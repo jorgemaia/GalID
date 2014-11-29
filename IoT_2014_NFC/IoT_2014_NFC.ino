@@ -13,9 +13,14 @@
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);	// Create MFRC522 instance
 
+#define TRUE 1
+#define FALSE 0
+
 #define MAX_ID_BUFFER_LEN 30
-#define PATH_LIBERADOS "/media/card/cartoes/liberados/"
-#define PATH_BLOQUEADOS "/media/card/cartoes/bloqueados/"
+
+// Deve ser alterada biblioteca SD (SD.cpp) pois nosso firmware monta cartao em /media/card em vez do nome que esta na biblioteca
+#define PATH_LIBERADOS "cartoes/liberados/"
+#define PATH_BLOQUEADOS "cartoes/bloqueados/"
 
 char idBuffer[MAX_ID_BUFFER_LEN];
 char fname[200];
@@ -65,15 +70,31 @@ void setup() {
 //PIN not required for galileo
   if (!SD.begin(0)) {
     Serial.println("SD initialization failed!");
-    return;
-  }
+  } 
+
+
         system("mkdir /media/card/cartoes");
         system("mkdir /media/card/cartoes/liberados");
         system("mkdir /media/card/cartoes/bloqueados");
 
+
+}
+
+void testeArquivos() {
+
 // Ids para  teste
         system("echo 1> /media/card/cartoes/liberados/00000000");        
         system("echo 1> /media/card/cartoes/bloqueados/00000001");
+
+        strcpy(idBuffer,"00000000");
+        tratarCartao();
+        
+        strcpy(idBuffer,"00000001");
+        tratarCartao();
+
+        strcpy(idBuffer,"00000002");
+        tratarCartao();
+
 }
 
 void loop() {
@@ -85,15 +106,7 @@ void loop() {
           tratarCartao();
 	}
         
-        delay(5000);
-        strcpy(idBuffer,"00000000");
-        tratarCartao();
-        
-        strcpy(idBuffer,"00000001");
-        tratarCartao();
 
-        strcpy(idBuffer,"00000002");
-        tratarCartao();
 }
 
 
