@@ -60,6 +60,7 @@ void tratarCartao() {
          strcat(fname, idBuffer);
          Serial.println(fname);
     
+         lcd.clear();
          lcd.println(idBuffer);
          
          if (SD.exists(fname)) {
@@ -109,6 +110,9 @@ void setup() {
 
         delay(5000);
         lcd.begin(16, 2);
+        lcd.clear();
+        lcd.setRGB(0,0,0);
+
         
 	Serial.begin(115200);		// Initialize serial communications with the PC
 	SPI.begin();			// Init SPI bus
