@@ -20,6 +20,7 @@
 
 #define SCRIPT_LIBERADO "cartoes/liberado.sh"
 #define SCRIPT_BLOQUEADO "cartoes/bloqueado.sh"
+#define SCRIPT_SEM_ACESSO "cartoes/sem_acesso.sh"
 
 #define PATH_LIBERADOS "cartoes/liberados/"
 #define PATH_BLOQUEADOS "cartoes/bloqueados/"
@@ -31,7 +32,7 @@
 
 #define MFRC_RST_PIN		9		// 
 #define MFRC_SS_PIN		10		//
-#define TO_HEX(c) (c < 10 ? ( c + '0') : (c - 10 + 'A'))
+#define TO_HEX(c) ((c) < 10 ? ( (c) + '0') : ((c) - 10 + 'A'))
 
 MFRC522 mfrc522(MFRC_SS_PIN, MFRC_RST_PIN);	// Create MFRC522 instance
 rgb_lcd lcd;
@@ -43,7 +44,7 @@ FILE f;
 void preparaIdBuffer() {
          byte b=0;
          for (byte i =0 ; i < mfrc522.uid.size; i++ ) {
-             idBuffer[b++] = TO_HEX((mfrc522.uid.uidByte[i] & 0xf0) >> 8);
+             idBuffer[b++] = TO_HEX((mfrc522.uid.uidByte[i] & 0xf0) >> 4);
              idBuffer[b++] = TO_HEX(mfrc522.uid.uidByte[i] & 0x0f);
 
          }
@@ -51,8 +52,10 @@ void preparaIdBuffer() {
 }
 
 void tratarCartao() {
-         Serial.print("UID = ");
-         Serial.println(idBuffer);
+         Serial.print("UID = |");
+         Serial.print(idBuffer);
+         Serial.println("|");
+         
          strcpy(fname, PATH_LIBERADOS);
          strcat(fname, idBuffer);
          Serial.println(fname);
@@ -93,7 +96,10 @@ void tratarCartao() {
              } else {
                Serial.println("Nao tem acesso");
                lcd.setRGB(0xff,0xff,0x00);
-             // TODO usuario nao tem acesso
+
+                   strcpy(fname, SCRIPT_SEM_ACESSO " ");
+                   strcat(fname, idBuffer);
+                   system(fname);
              }
          }       
 
