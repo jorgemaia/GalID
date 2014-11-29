@@ -18,8 +18,11 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);	// Create MFRC522 instance
 
 #define MAX_ID_BUFFER_LEN 30
 
-// Deve ser alterada biblioteca SD (SD.cpp) pois nosso firmware monta cartao em /media/card em vez do nome que esta na biblioteca
-#define SD_CARD_BASE "/media/card"
+
+// Caso o firmware esteja montando em outro diretorio nao funciona
+// nesse caso ajustar o /etc/fstab para esse diretorio que eh o utilizado pela biblioteca do SD
+#define SD_CARD_BASE "/media/mmcblk0p1"
+
 #define PATH_LIBERADOS "cartoes/liberados/"
 #define PATH_BLOQUEADOS "cartoes/bloqueados/"
 
