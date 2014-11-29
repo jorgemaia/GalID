@@ -18,6 +18,9 @@
 // nesse caso ajustar o /etc/fstab para esse diretorio que eh o utilizado pela biblioteca do SD
 #define SD_CARD_BASE "/media/mmcblk0p1"
 
+#define SCRIPT_LIBERADO "cartoes/liberado.sh"
+#define SCRIPT_BLOQUEADO "cartoes/bloqueado.sh"
+
 #define PATH_LIBERADOS "cartoes/liberados/"
 #define PATH_BLOQUEADOS "cartoes/bloqueados/"
 
@@ -28,7 +31,7 @@
 
 #define MFRC_RST_PIN		9		// 
 #define MFRC_SS_PIN		10		//
-#define TO_HEX(c) (c < 10 ? (c+'0') : (c - 10 + 'A'))
+#define TO_HEX(c) (c < 10 ? ( c + '0') : (c - 10 + 'A'))
 
 MFRC522 mfrc522(MFRC_SS_PIN, MFRC_RST_PIN);	// Create MFRC522 instance
 rgb_lcd lcd;
@@ -40,8 +43,8 @@ FILE f;
 void preparaIdBuffer() {
          byte b=0;
          for (byte i =0 ; i < mfrc522.uid.size; i++ ) {
-             idBuffer[b++] = TO_HEX(((mfrc522.uid.uidByte[i] & 0xf0) >> 8) + '0');
-             idBuffer[b++] = TO_HEX((mfrc522.uid.uidByte[i] & 0x0f) + '0');
+             idBuffer[b++] = TO_HEX((mfrc522.uid.uidByte[i] & 0xf0) >> 8);
+             idBuffer[b++] = TO_HEX(mfrc522.uid.uidByte[i] & 0x0f);
 
          }
          idBuffer[b] = 0;
@@ -57,10 +60,18 @@ void tratarCartao() {
          lcd.println(idBuffer);
          
          if (SD.exists(fname)) {
-             //TODO usuario tem acesso
-               Serial.println("Acesso Liberado");
-               
                lcd.setRGB(0x00,0xff,0x00);
+               Serial.println("Acesso Liberado");
+
+               strcat(fname, ".sh");
+               if (SD.exists(fname)) {
+                   system(fname);
+               } else {
+                   strcpy(fname, SCRIPT_LIBERADO " ");
+                   strcat(fname, idBuffer);
+                   system(fname);
+               }
+               
          } else {
              strcpy(fname, PATH_BLOQUEADOS);
              strcat(fname, idBuffer);
@@ -68,6 +79,16 @@ void tratarCartao() {
              if (SD.exists(fname)) {
                lcd.setRGB(0xff,0x00,0x00);
                Serial.println("Acesso Bloqueado");
+               strcat(fname, ".sh");
+               if (SD.exists(fname)) {
+                   system(fname);
+               } else {
+                   strcpy(fname, SCRIPT_BLOQUEADO " ");
+                   strcat(fname, idBuffer);
+                   system(fname);
+               }
+
+
                 // TODO usuario tem acesso bloqueado/proibido
              } else {
                Serial.println("Nao tem acesso");
