@@ -7,24 +7,12 @@
 #include <stdio.h>
 #include <MFRC522.h>
 
+// http://www.seeedstudio.com/wiki/Grove_-_LCD_RGB_Backlight
 // https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight.git
 #include <Wire.h>
 #include <rgb_lcd.h>
 
 #include <SD.h>
-
-#define RST_PIN		9		// 
-#define SS_PIN		10		//
-
-MFRC522 mfrc522(SS_PIN, RST_PIN);	// Create MFRC522 instance
-
-#define TRUE 1
-#define FALSE 0
-
-#define MAX_ID_BUFFER_LEN 30
-
-rgb_lcd lcd;
-
 
 // Caso o firmware esteja montando em outro diretorio nao funciona
 // nesse caso ajustar o /etc/fstab para esse diretorio que eh o utilizado pela biblioteca do SD
@@ -33,6 +21,18 @@ rgb_lcd lcd;
 #define PATH_LIBERADOS "cartoes/liberados/"
 #define PATH_BLOQUEADOS "cartoes/bloqueados/"
 
+#define MAX_ID_BUFFER_LEN 30
+#define TRUE 1
+#define FALSE 0
+
+
+#define MFRC_RST_PIN		9		// 
+#define MFRC_SS_PIN		10		//
+#define TO_HEX(c) (c < 10 ? (c+'0') : (c - 10 + 'A'))
+
+MFRC522 mfrc522(MFRC_SS_PIN, MFRC_RST_PIN);	// Create MFRC522 instance
+rgb_lcd lcd;
+
 char idBuffer[MAX_ID_BUFFER_LEN];
 char fname[200];
 FILE f;
@@ -40,8 +40,8 @@ FILE f;
 void preparaIdBuffer() {
          byte b=0;
          for (byte i =0 ; i < mfrc522.uid.size; i++ ) {
-             idBuffer[b++] = ((mfrc522.uid.uidByte[i] & 0xf0) >> 8) + '0';
-             idBuffer[b++] = (mfrc522.uid.uidByte[i] & 0x0f) + '0';
+             idBuffer[b++] = TO_HEX(((mfrc522.uid.uidByte[i] & 0xf0) >> 8) + '0');
+             idBuffer[b++] = TO_HEX((mfrc522.uid.uidByte[i] & 0x0f) + '0');
 
          }
          idBuffer[b] = 0;
@@ -54,11 +54,12 @@ void tratarCartao() {
          strcat(fname, idBuffer);
          Serial.println(fname);
     
-         lcd.print(idBuffer);
+         lcd.println(idBuffer);
          
          if (SD.exists(fname)) {
              //TODO usuario tem acesso
                Serial.println("Acesso Liberado");
+               
                lcd.setRGB(0x00,0xff,0x00);
          } else {
              strcpy(fname, PATH_BLOQUEADOS);
@@ -118,10 +119,12 @@ void testeArquivos() {
 void loop() {
 	// Look for new cards
 	if ( mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-    	  // Dump debug info about the card; PICC_HaltA() is automatically called
-	  mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
           preparaIdBuffer();
           tratarCartao();
+
+    	  // Dump debug info about the card; PICC_HaltA() is automatically called
+	  mfrc522.PICC_DumpToSerial(&(mfrc522.uid));
+
 	}
 
 //        delay(5000);
