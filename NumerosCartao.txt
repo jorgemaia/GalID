@@ -1,4 +1,7 @@
 
 6C C6 5B 74 Com Papel
 94 94 5B 74 Sem Papel
+04B80762BC2B84 Android 1
+04640862BC2B84 Android 2 
+049D0662BC2B84 Android 3
 
